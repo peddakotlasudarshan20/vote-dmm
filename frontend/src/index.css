@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Premium Collegiate Palette — Navy, Teal, Gold, and Crisp Paper */
+    --paper: #F8FAFC;
+    --paper-raised: #FFFFFF;
+    --ink: #0F172A;
+    --ink-soft: #475569;
+    --line: #E2E8F0;
+    --gold: #D97706;
+    --gold-soft: #FEF3C7;
+    --ballot-green: #0D9488;
+    --ballot-green-soft: #CCFBF1;
+    --ballot-red: #E11D48;
+    --ballot-red-soft: #FFE4E6;
+
+    --font-display: "Fraunces", "Georgia", serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(217, 119, 6, 0.03) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Custom premium utility classes */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.08);
+  border-color: var(--gold);
+}
+
+.button-primary {
+  background: var(--ink);
+  color: var(--paper-raised);
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
+}
+.button-primary:hover {
+  background: var(--gold);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.2);
+}
+.button-primary:active {
+  transform: translateY(0);
+}
+
+/* Perforated ballot receipt stub edge */
+.stub-edge {
+  position: relative;
+  overflow: hidden;
+}
+.stub-edge::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background-image: radial-gradient(circle, var(--paper) 3px, transparent 3.5px);
+  background-size: 12px 6px;
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-soft);
+}
+
+::selection {
+  background: var(--gold-soft);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
