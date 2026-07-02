@@ -382,24 +382,61 @@ CORS(app, origins=[FRONTEND_ORIGIN])
 
 # ---------------------------------------------------------------- helpers
 def get_current_user():
-    """Read the Supabase JWT from the Authorization header and resolve
-    it to a profile row. Returns None if missing/invalid."""
+    """Read the Supabase JWT and ensure a profile exists."""
+
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         return None
+
     token = auth_header.split(" ", 1)[1]
+
     try:
         user_resp = sb.auth.get_user(token)
     except Exception:
         return None
+
     if not user_resp or not user_resp.user:
         return None
-    uid = user_resp.user.id
-    profile = sb.table("profiles").select("*").eq("id", uid).single().execute()
-    if not profile.data:
-        return None
-    return profile.data
 
+    user = user_resp.user
+    uid = user.id
+
+    # Try to load existing profile
+    profile = (
+        sb.table("profiles")
+        .select("*")
+        .eq("id", uid)
+        .single()
+        .execute()
+    )
+
+    if profile.data:
+        return profile.data
+
+    # Create profile automatically if it doesn't exist
+    metadata = user.user_metadata or {}
+
+    new_profile = {
+        "id": uid,
+        "full_name": metadata.get("full_name", ""),
+        "email": user.email,
+        "mobile": metadata.get("mobile", ""),
+        "voter_id": metadata.get("voter_id", ""),
+        "role": "voter",
+        "status": "pending_approval",
+    }
+
+    sb.table("profiles").insert(new_profile).execute()
+
+    profile = (
+        sb.table("profiles")
+        .select("*")
+        .eq("id", uid)
+        .single()
+        .execute()
+    )
+
+    return profile.data
 
 def require_auth(f):
     @wraps(f)
