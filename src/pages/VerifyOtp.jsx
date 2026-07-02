@@ -40,7 +40,7 @@ export default function VerifyOtp() {
     <div className="max-w-sm mx-auto px-6 py-16 text-center">
       <div className="w-14 h-14 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-2xl mb-6">✉️</div>
       <h1 className="font-display text-2xl font-semibold mb-2">Check your email</h1>
-      <p className="text-[var(--ink-soft)] mb-8">Enter the 6-digit code we sent to verify your address.</p>
+      <p className="text-[var(--ink-soft)] mb-8">Enter the 8-digit code we sent to verify your address.</p>
 
       <form onSubmit={verify} className="space-y-4 text-left">
         <label className="block">
