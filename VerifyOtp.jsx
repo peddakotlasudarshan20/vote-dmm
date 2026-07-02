@@ -54,7 +54,7 @@ export default function VerifyOtp() {
           <span className="text-sm font-medium">Verification code</span>
           <input
             required value={code} onChange={(e) => setCode(e.target.value)}
-            maxLength={8} inputMode="numeric" placeholder="000000"
+            maxLength={8} inputMode="numeric" placeholder="00000000"
             className="mt-1 w-full px-3.5 py-2.5 rounded-lg border border-[var(--line)] outline-none focus:border-[var(--gold)] font-mono text-lg tracking-[0.4em] text-center"
           />
         </label>
