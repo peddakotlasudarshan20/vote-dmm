@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { FullPageSpinner } from '../components/ProtectedRoute'
+import PageShell from '../components/ui/PageShell'
+import Card from '../components/ui/Card'
+import Alert from '../components/ui/Alert'
+import Button from '../components/ui/Button'
+import { SkeletonCard } from '../components/ui/Skeleton'
 
 export default function CandidateProfile() {
   const { id } = useParams()
@@ -16,62 +20,73 @@ export default function CandidateProfile() {
       })
   }, [id])
 
-  if (error) return <p className="max-w-2xl mx-auto px-6 py-16 text-[var(--ballot-red)]">{error}</p>
-  if (!candidate) return <FullPageSpinner />
+  if (error) return (
+    <PageShell maxWidth="lg">
+      <Alert variant="error">{error}</Alert>
+    </PageShell>
+  )
+
+  if (!candidate) return (
+    <PageShell maxWidth="lg">
+      <SkeletonCard lines={6} />
+    </PageShell>
+  )
 
   const links = candidate.social_links || {}
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-14">
-      <Link to={`/elections/${candidate.election_id}`} className="text-sm text-[var(--ink-soft)] hover:text-[var(--ink)]">← Back to candidates</Link>
-
-      <div className="mt-6 flex items-center gap-4">
-        <div className="w-20 h-20 rounded-full bg-[var(--gold-soft)] flex items-center justify-center overflow-hidden shrink-0">
-          {candidate.photo_url
-            ? <img src={candidate.photo_url} alt="" className="w-full h-full object-cover" />
-            : <span className="font-display text-2xl">{candidate.name[0]}</span>}
+    <PageShell maxWidth="lg" backTo={`/elections/${candidate.election_id}`} backLabel="Back to candidates">
+      <Card padding="p-6 sm:p-8" className="mb-6">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-20 h-20 rounded-full bg-[var(--gold-soft)] flex items-center justify-center overflow-hidden shrink-0">
+            {candidate.photo_url
+              ? <img src={candidate.photo_url} alt={`Photo of ${candidate.name}`} className="w-full h-full object-cover" />
+              : <span className="font-display text-2xl" aria-hidden="true">{candidate.name[0]}</span>}
+          </div>
+          <div>
+            <h1 className="font-display text-2xl font-semibold">{candidate.name}</h1>
+            <p className="text-[var(--ink-soft)]">{candidate.party_name}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-display text-2xl font-semibold">{candidate.name}</h1>
-          <p className="text-[var(--ink-soft)]">{candidate.party_name}</p>
-        </div>
-      </div>
 
-      <dl className="grid grid-cols-2 gap-4 mt-8 text-sm">
-        <Detail label="Age" value={candidate.age} />
-        <Detail label="Qualification" value={candidate.qualification} />
-        <Detail label="Experience" value={candidate.experience} />
-      </dl>
+        <dl className="grid grid-cols-2 sm:grid-cols-3 gap-5 text-sm mb-6">
+          <Detail label="Age" value={candidate.age} />
+          <Detail label="Qualification" value={candidate.qualification} />
+          <Detail label="Experience" value={candidate.experience} />
+        </dl>
+      </Card>
 
       {candidate.biography && (
-        <div className="mt-8">
-          <h2 className="font-medium mb-2">Biography</h2>
+        <Card padding="p-6 sm:p-8" className="mb-6">
+          <h2 className="text-xs font-semibold text-[var(--ink-soft)] uppercase tracking-wider mb-3">Biography</h2>
           <p className="text-[var(--ink-soft)] leading-relaxed">{candidate.biography}</p>
-        </div>
+        </Card>
       )}
 
-      <div className="flex flex-wrap gap-3 mt-8">
-        {candidate.manifesto_url && (
-          <a href={candidate.manifesto_url} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-lg border border-[var(--line)] hover:border-[var(--gold)] text-sm font-medium">
-            Read manifesto (PDF)
-          </a>
-        )}
-        {Object.entries(links).map(([platform, url]) => (
-          <a key={platform} href={url} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-lg border border-[var(--line)] hover:border-[var(--gold)] text-sm font-medium capitalize">
-            {platform}
-          </a>
-        ))}
-      </div>
-    </div>
+      {(candidate.manifesto_url || Object.keys(links).length > 0) && (
+        <div className="flex flex-wrap gap-3">
+          {candidate.manifesto_url && (
+            <a href={candidate.manifesto_url} target="_blank" rel="noreferrer" aria-label="Read manifesto PDF (opens in new tab)">
+              <Button variant="secondary" size="sm">Read manifesto (PDF)</Button>
+            </a>
+          )}
+          {Object.entries(links).map(([platform, url]) => (
+            <a key={platform} href={url} target="_blank" rel="noreferrer" aria-label={`${platform} profile (opens in new tab)`}>
+              <Button variant="secondary" size="sm" className="capitalize">{platform}</Button>
+            </a>
+          ))}
+        </div>
+      )}
+    </PageShell>
   )
 }
 
 function Detail({ label, value }) {
   if (!value) return null
   return (
-    <div>
-      <dt className="text-[var(--ink-soft)] text-xs uppercase tracking-wide">{label}</dt>
-      <dd className="font-medium">{value}</dd>
+    <div className="bg-[var(--paper)] p-3 rounded-xl border border-[var(--line)]/30">
+      <dt className="text-[var(--ink-soft)] text-xs uppercase tracking-wider font-semibold">{label}</dt>
+      <dd className="font-medium mt-0.5">{value}</dd>
     </div>
   )
 }

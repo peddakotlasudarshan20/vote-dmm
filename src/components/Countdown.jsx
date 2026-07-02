@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 
 function diff(target) {
   const ms = new Date(target) - new Date()
@@ -10,7 +10,7 @@ function diff(target) {
   return { d, h, m, s }
 }
 
-export default function Countdown({ target, label }) {
+const Countdown = memo(function Countdown({ target, label }) {
   const [t, setT] = useState(() => diff(target))
 
   useEffect(() => {
@@ -20,16 +20,20 @@ export default function Countdown({ target, label }) {
 
   if (!t) return null
 
+  const ariaText = `${label} ${t.d} days, ${t.h} hours, ${t.m} minutes, ${t.s} seconds`
+
   return (
-    <div className="flex items-center gap-3 font-mono text-sm">
+    <div className="flex items-center gap-3 font-mono text-sm" role="timer" aria-label={ariaText}>
       <span className="text-[var(--ink-soft)]">{label}</span>
-      <span className="flex gap-1.5">
+      <span className="flex gap-1.5" aria-hidden="true">
         {[[t.d, 'd'], [t.h, 'h'], [t.m, 'm'], [t.s, 's']].map(([v, u]) => (
-          <span key={u} className="px-1.5 py-0.5 bg-[var(--ink)] text-[var(--paper)] rounded">
+          <span key={u} className="px-1.5 py-0.5 bg-[var(--ink)] text-[var(--paper)] rounded tabular-nums">
             {String(v).padStart(2, '0')}{u}
           </span>
         ))}
       </span>
     </div>
   )
-}
+})
+
+export default Countdown

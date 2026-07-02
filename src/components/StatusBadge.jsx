@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 const STYLES = {
   upcoming: 'bg-[var(--gold-soft)] text-[var(--gold)]',
   active: 'bg-[var(--ballot-green-soft)] text-[var(--ballot-green)]',
@@ -16,11 +18,18 @@ const LABELS = {
   rejected: 'Rejected',
 }
 
-export default function StatusBadge({ status }) {
+const StatusBadge = memo(function StatusBadge({ status }) {
+  const label = LABELS[status] || status
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${STYLES[status] || STYLES.completed}`}>
-      {status === 'active' && <span className="w-1.5 h-1.5 rounded-full bg-[var(--ballot-green)] animate-pulse" />}
-      {LABELS[status] || status}
+    <span
+      role="status"
+      aria-label={`Status: ${label}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${STYLES[status] || STYLES.completed}`}
+    >
+      {status === 'active' && <span className="w-1.5 h-1.5 rounded-full bg-[var(--ballot-green)] animate-pulse" aria-hidden="true" />}
+      {label}
     </span>
   )
-}
+})
+
+export default StatusBadge

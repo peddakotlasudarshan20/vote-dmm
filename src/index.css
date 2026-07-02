@@ -41,30 +41,6 @@
   }
 }
 
-/* Custom premium utility classes */
-.card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.08);
-  border-color: var(--gold);
-}
-
-.button-primary {
-  background: var(--ink);
-  color: var(--paper-raised);
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
-}
-.button-primary:hover {
-  background: var(--gold);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.2);
-}
-.button-primary:active {
-  transform: translateY(0);
-}
 
 /* Perforated ballot receipt stub edge */
 .stub-edge {
@@ -108,4 +84,158 @@
 :focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+/* ── Animations ──────────────────────────────────────── */
+
+/* Page content fade-in */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-page-enter {
+  animation: page-enter 0.35s ease-out both;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--line) 25%, #f1f5f9 50%, var(--line) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Staggered card entrance */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-card-enter {
+  animation: card-enter 0.4s ease-out both;
+}
+
+/* Alert slide-in */
+@keyframes alert-enter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-alert-enter {
+  animation: alert-enter 0.25s ease-out both;
+}
+
+/* Stat counter scale-in */
+@keyframes stat-pop {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-stat-pop {
+  animation: stat-pop 0.3s ease-out both;
+}
+
+/* Smooth form field focus glow */
+.form-field-focus {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.form-field-focus:focus {
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+}
+
+/* Enhanced card hover (replaces basic card-hover) */
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.1);
+  border-color: var(--gold);
+}
+
+/* Button loading spinner */
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+/* ── Navbar ───────────────────────────────────────────── */
+
+/* Enhanced shadow when page is scrolled */
+.navbar-scrolled {
+  box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.08);
+}
+
+/* Mobile menu — smooth open/close via grid-rows trick */
+.mobile-menu-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-menu-wrap[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+.mobile-menu-inner {
+  overflow: hidden;
+}
+
+/* Backdrop overlay behind the mobile menu */
+.mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.mobile-backdrop[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Hamburger icon → X morph */
+.hamburger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+  transition: transform 0.3s ease, opacity 0.2s ease;
+  transform-origin: center;
+}
+.hamburger-open .hamburger-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.hamburger-open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+.hamburger-open .hamburger-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Nav link active indicator */
+.nav-link-active {
+  color: var(--ink) !important;
+  position: relative;
+}
+.nav-link-active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--gold);
 }

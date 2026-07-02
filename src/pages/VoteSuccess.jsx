@@ -1,11 +1,13 @@
 import { Link, useLocation, Navigate } from 'react-router-dom'
+import PageShell from '../components/ui/PageShell'
+import Button from '../components/ui/Button'
 
 export default function VoteSuccess() {
   const { state } = useLocation()
   if (!state) return <Navigate to="/dashboard" replace />
 
   return (
-    <div className="max-w-sm mx-auto px-6 py-16 text-center">
+    <PageShell maxWidth="sm" center>
       <div className="w-16 h-16 mx-auto rounded-full bg-[var(--ballot-green-soft)] flex items-center justify-center text-3xl mb-6 animate-[bounce_1s_ease-in-out_1]">
         ✅
       </div>
@@ -21,9 +23,9 @@ export default function VoteSuccess() {
         </div>
       </div>
 
-      <Link to="/dashboard" className="inline-block mt-8 px-6 py-3 rounded-lg bg-[var(--ink)] text-[var(--paper)] font-medium">
-        Back to elections
+      <Link to="/dashboard" className="inline-block mt-8">
+        <Button size="lg">Back to elections</Button>
       </Link>
-    </div>
+    </PageShell>
   )
 }

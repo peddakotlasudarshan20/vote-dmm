@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { api } from '../lib/api'
-import { FullPageSpinner } from '../components/ProtectedRoute'
+import PageShell from '../components/ui/PageShell'
+import Card from '../components/ui/Card'
+import Alert from '../components/ui/Alert'
+import EmptyState from '../components/ui/EmptyState'
+import { SkeletonCard, SkeletonStatGrid } from '../components/ui/Skeleton'
 
 const COLORS = ['#B8862B', '#2E6350', '#4A5468', '#A83E33', '#7A6A9C', '#3B7A9A']
 
@@ -15,43 +19,59 @@ export default function Results() {
     api.results(id).then(setData).catch((e) => setError(e.message))
   }, [id])
 
-  if (error) return <p className="max-w-4xl mx-auto px-6 py-16 text-[var(--ballot-red)]">{error}</p>
-  if (!data) return <FullPageSpinner />
+  if (error) return (
+    <PageShell maxWidth="xl">
+      <Alert variant="error">{error}</Alert>
+    </PageShell>
+  )
+
+  if (!data) return (
+    <PageShell maxWidth="xl">
+      <div className="skeleton w-64 h-8 mb-8 rounded-lg" />
+      <SkeletonStatGrid count={2} />
+      <div className="grid md:grid-cols-2 gap-5 mt-5">
+        <SkeletonCard lines={6} />
+        <SkeletonCard lines={6} />
+      </div>
+    </PageShell>
+  )
 
   if (!data.published) {
     return (
-      <div className="max-w-md mx-auto px-6 py-24 text-center">
-        <div className="w-14 h-14 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-2xl mb-6">📊</div>
-        <h1 className="font-display text-2xl font-semibold mb-2">Results have not yet been published</h1>
-        <p className="text-[var(--ink-soft)] mb-8">The admin will publish results once counting is complete.</p>
-        <Link to="/dashboard" className="text-[var(--gold)] font-medium">← Back to elections</Link>
-      </div>
+      <PageShell maxWidth="md" center>
+        <EmptyState
+          icon="📊"
+          title="Results have not yet been published"
+          description="The admin will publish results once counting is complete."
+        >
+          <Link to="/dashboard" className="text-[var(--gold)] font-medium hover:underline">← Back to elections</Link>
+        </EmptyState>
+      </PageShell>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-14">
-      <Link to="/dashboard" className="text-sm text-[var(--ink-soft)] hover:text-[var(--ink)]">← All elections</Link>
-      <h1 className="font-display text-3xl font-semibold mt-4 mb-8">{data.election_name} — Results</h1>
+    <PageShell maxWidth="xl" backTo="/dashboard" backLabel="All elections">
+      <h1 className="font-display text-2xl sm:text-3xl font-semibold mt-2 mb-8">{data.election_name} — Results</h1>
 
       {data.winner && (
-        <div className="bg-[var(--ink)] text-[var(--paper)] rounded-2xl p-8 mb-8 flex items-center gap-6">
-          <div className="w-16 h-16 rounded-full bg-[var(--gold)] flex items-center justify-center text-2xl shrink-0">🏆</div>
+        <Card className="mb-8 flex flex-col sm:flex-row items-center gap-6 animate-card-enter" padding="p-6 sm:p-8" style={{ background: 'var(--ink)', color: 'var(--paper)' }}>
+          <div className="w-16 h-16 rounded-full bg-[var(--gold)] flex items-center justify-center text-2xl shrink-0" aria-hidden="true">🏆</div>
           <div>
             <p className="font-mono text-xs opacity-60 uppercase">Winner</p>
             <p className="font-display text-2xl font-semibold">{data.winner.name}</p>
             <p className="opacity-80 text-sm">{data.winner.party_name} · {data.winner.votes} votes ({data.winner.percentage}%)</p>
           </div>
-        </div>
+        </Card>
       )}
 
-      <div className="grid sm:grid-cols-2 gap-4 mb-10">
+      <div className="grid sm:grid-cols-2 gap-5 mb-8">
         <StatCard label="Total votes cast" value={data.total_votes} />
         <StatCard label="Voter turnout" value={`${data.turnout_percentage}%`} />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-10">
-        <div className="bg-[var(--paper-raised)] border border-[var(--line)] rounded-xl p-6">
+      <div className="grid md:grid-cols-2 gap-5 mb-8">
+        <Card padding="p-5 sm:p-6">
           <p className="font-medium mb-4">Votes by candidate</p>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={data.rankings} layout="vertical" margin={{ left: 10 }}>
@@ -63,9 +83,9 @@ export default function Results() {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
 
-        <div className="bg-[var(--paper-raised)] border border-[var(--line)] rounded-xl p-6">
+        <Card padding="p-5 sm:p-6">
           <p className="font-medium mb-4">Vote share</p>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
@@ -75,36 +95,44 @@ export default function Results() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
       </div>
 
-      <div className="bg-[var(--paper-raised)] border border-[var(--line)] rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-[var(--paper)] text-[var(--ink-soft)] text-left">
-            <tr><th className="p-3">Rank</th><th className="p-3">Candidate</th><th className="p-3">Party</th><th className="p-3 text-right">Votes</th><th className="p-3 text-right">%</th></tr>
-          </thead>
-          <tbody>
-            {data.rankings.map((r, i) => (
-              <tr key={r.candidate_id} className="border-t border-[var(--line)]">
-                <td className="p-3 font-mono">{i + 1}</td>
-                <td className="p-3 font-medium">{r.name}</td>
-                <td className="p-3 text-[var(--ink-soft)]">{r.party_name}</td>
-                <td className="p-3 text-right font-mono">{r.votes}</td>
-                <td className="p-3 text-right font-mono">{r.percentage}%</td>
+      <Card padding="p-0" className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" role="table" aria-label="Election results ranking">
+            <thead className="bg-[var(--paper)] text-[var(--ink-soft)] text-left">
+              <tr>
+                <th scope="col" className="p-3 sm:p-4">Rank</th>
+                <th scope="col" className="p-3 sm:p-4">Candidate</th>
+                <th scope="col" className="p-3 sm:p-4 hidden sm:table-cell">Party</th>
+                <th scope="col" className="p-3 sm:p-4 text-right">Votes</th>
+                <th scope="col" className="p-3 sm:p-4 text-right">%</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {data.rankings.map((r, i) => (
+                <tr key={r.candidate_id} className="border-t border-[var(--line)] hover:bg-[var(--paper)]/30 transition-colors">
+                  <td className="p-3 sm:p-4 font-mono">{i + 1}</td>
+                  <td className="p-3 sm:p-4 font-medium">{r.name}</td>
+                  <td className="p-3 sm:p-4 text-[var(--ink-soft)] hidden sm:table-cell">{r.party_name}</td>
+                  <td className="p-3 sm:p-4 text-right font-mono tabular-nums">{r.votes}</td>
+                  <td className="p-3 sm:p-4 text-right font-mono tabular-nums">{r.percentage}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </PageShell>
   )
 }
 
 function StatCard({ label, value }) {
   return (
-    <div className="bg-[var(--paper-raised)] border border-[var(--line)] rounded-xl p-6">
-      <p className="text-xs uppercase tracking-wide text-[var(--ink-soft)] mb-1">{label}</p>
-      <p className="font-display text-3xl font-semibold">{value}</p>
-    </div>
+    <Card padding="p-5 sm:p-6" className="animate-stat-pop">
+      <p className="text-xs uppercase tracking-wider font-semibold text-[var(--ink-soft)] mb-1">{label}</p>
+      <p className="font-display text-3xl font-semibold tabular-nums">{value}</p>
+    </Card>
   )
 }
