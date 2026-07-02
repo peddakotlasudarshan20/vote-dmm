@@ -1,9 +1,18 @@
-node_modules
+# Environment files
 .env
 frontend/.env
 backend/.env
+
+# Dependencies
 node_modules/
+frontend/node_modules/
+
+# Build folders
 dist/
 frontend/dist/
+
+# Python virtual environments
 .venv/
 backend/venv/
+backend/__pycache__/
+*.pyc
