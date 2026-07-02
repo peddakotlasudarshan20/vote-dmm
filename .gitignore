@@ -1,1 +1,9 @@
 node_modules
+.env
+frontend/.env
+backend/.env
+node_modules/
+dist/
+frontend/dist/
+.venv/
+backend/venv/
