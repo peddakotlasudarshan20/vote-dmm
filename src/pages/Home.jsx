@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import Footer from '../components/ui/Footer'
 
 export default function Home() {
   const { session } = useAuth()
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex flex-col justify-between overflow-hidden">
+    <div className="overflow-hidden">
       <section
         className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-12 sm:pb-24 grid md:grid-cols-2 gap-8 sm:gap-12 items-center w-full"
         aria-labelledby="hero-heading"
@@ -60,7 +59,6 @@ export default function Home() {
         </aside>
       </section>
 
-      <Footer />
     </div>
   )
 }

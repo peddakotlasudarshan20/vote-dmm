@@ -63,7 +63,7 @@ export default function Register() {
   }
 
   return (
-    <PageShell maxWidth="md">
+    <PageShell maxWidth="md" center>
       <Card padding="p-6 sm:p-8">
         <div className="text-center mb-6">
           <div className="w-12 h-12 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-xl mb-3" aria-hidden="true">📝</div>
@@ -71,7 +71,7 @@ export default function Register() {
           <p className="text-xs text-[var(--ink-soft)] mt-1">Government Polytechnic, Dharmavaram</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <FormField
             label="Full Name"
             value={form.full_name}

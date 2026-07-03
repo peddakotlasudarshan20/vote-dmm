@@ -13,6 +13,11 @@ const NAV_ITEMS = [
   { to: '/admin/notifications', icon: '🔔', label: 'Notifications' },
 ]
 
+const SHORT_LABELS = {
+  Dashboard: 'Home',
+  Notifications: 'Notifs',
+}
+
 const SidebarLink = memo(function SidebarLink({ to, icon, label, active }) {
   return (
     <Link
@@ -49,14 +54,14 @@ export default function AdminLayout() {
           ))}
         </aside>
 
-        {/* Main content area */}
-        <main className="flex-1 min-w-0">
+        {/* Main content area — pb-20 on mobile for bottom nav clearance */}
+        <main className="flex-1 min-w-0 pb-20 md:pb-0">
           <Outlet />
         </main>
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--paper-raised)]/95 backdrop-blur-md border-t border-[var(--line)] px-2 py-1.5 flex justify-around" aria-label="Admin navigation">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--paper-raised)]/95 backdrop-blur-md border-t border-[var(--line)] px-2 py-1.5 flex justify-around safe-area-bottom" aria-label="Admin navigation">
         {NAV_ITEMS.map((item) => {
           const active = isActive(item)
           return (
@@ -69,18 +74,11 @@ export default function AdminLayout() {
               }`}
             >
               <span className="text-lg">{item.icon}</span>
-              <span>{label(item.label)}</span>
+              <span>{SHORT_LABELS[item.label] || item.label}</span>
             </Link>
           )
         })}
       </nav>
     </div>
   )
-}
-
-function label(text) {
-  // Shorten labels for mobile bottom nav
-  if (text === 'Notifications') return 'Notifs'
-  if (text === 'Dashboard') return 'Home'
-  return text
 }

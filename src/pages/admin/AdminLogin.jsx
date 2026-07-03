@@ -15,14 +15,23 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [touched, setTouched] = useState({})
+
+  const touch = (field) => () => setTouched((t) => ({ ...t, [field]: true }))
+
+  const emailError = touched.email && !email ? 'Email is required' :
+                     touched.email && !/\S+@\S+\.\S+/.test(email) ? 'Enter a valid email' : ''
+  const passwordError = touched.password && !password ? 'Password is required' :
+                        touched.password && password.length < 8 ? 'Must be at least 8 characters' : ''
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!email || !password) return
+    setTouched({ email: true, password: true })
+    if (!email || !password || password.length < 8) return
 
     setLoading(true)
-    const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
+    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
 
     if (err) {
@@ -30,36 +39,29 @@ export default function AdminLogin() {
       return
     }
 
-    // Check if user is actually an admin
     await refreshProfile()
-    // Small delay for profile to load
-    setTimeout(async () => {
-      try {
-        const { profile } = await import('../../context/AuthContext').then(m => {
-          // We need to re-check after login
-        })
-      } catch {}
-      navigate('/admin')
-    }, 300)
+    navigate('/admin')
   }
 
   return (
-    <PageShell maxWidth="sm">
+    <PageShell maxWidth="sm" center>
       <Card padding="p-6 sm:p-8">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-[var(--ink)] flex items-center justify-center text-2xl mb-4">🔒</div>
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-[var(--ink)] flex items-center justify-center text-2xl mb-4" aria-hidden="true">🔒</div>
           <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--ink)]">Admin Portal</h1>
           <p className="text-xs text-[var(--ink-soft)] mt-1">Authorized administrators only</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5 text-left">
           <FormField
             label="Admin Email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={touch('email')}
             placeholder="admin@gptdvm.in"
+            error={emailError}
             autoComplete="email"
           />
           <FormField
@@ -68,7 +70,9 @@ export default function AdminLogin() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onBlur={touch('password')}
             placeholder="Enter admin password"
+            error={passwordError}
             autoComplete="current-password"
           />
 

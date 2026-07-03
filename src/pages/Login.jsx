@@ -49,7 +49,7 @@ export default function Login() {
   }
 
   return (
-    <PageShell maxWidth="sm">
+    <PageShell maxWidth="sm" center>
       <Card padding="p-6 sm:p-8">
         <div className="text-center mb-8">
           <div className="w-12 h-12 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-xl mb-3" aria-hidden="true">🗳️</div>
@@ -57,7 +57,7 @@ export default function Login() {
           <p className="text-xs text-[var(--ink-soft)] mt-1">Government Polytechnic, Dharmavaram</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5 text-left">
           <FormField
             label="Email Address"
             type="email"

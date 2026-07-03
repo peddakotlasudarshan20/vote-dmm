@@ -1,5 +1,4 @@
 import { useEffect, useState, memo } from 'react'
-import { toIST } from '../lib/dateTime'
 
 function diff(target) {
   const now = new Date()

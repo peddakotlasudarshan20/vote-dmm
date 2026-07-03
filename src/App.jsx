@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import Footer from './components/ui/Footer'
 import ProtectedRoute, { AdminRoute, FullPageSpinner } from './components/ProtectedRoute'
 import AdminLayout from './layouts/AdminLayout'
 
@@ -20,6 +21,7 @@ const VoteSuccess = lazy(() => import('./pages/VoteSuccess'))
 const Results = lazy(() => import('./pages/Results'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Notifications = lazy(() => import('./pages/Notifications'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
@@ -29,10 +31,13 @@ const ManageCandidates = lazy(() => import('./pages/admin/ManageCandidates'))
 const ManageNotifications = lazy(() => import('./pages/admin/ManageNotifications'))
 
 function App() {
+  const { pathname } = useLocation()
+  const isAdminRoute = pathname.startsWith('/admin') && pathname !== '/admin/login'
+
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main id="main-content">
+      <main id="main-content" className="flex-1">
         <Suspense fallback={<FullPageSpinner />}>
           <Routes>
             {/* Public */}
@@ -64,11 +69,13 @@ function App() {
               <Route path="/admin/notifications" element={<ManageNotifications />} />
             </Route>
 
-            <Route path="*" element={<Home />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>
-    </>
+      {/* Footer: shown on all pages except admin panel */}
+      {!isAdminRoute && <Footer />}
+    </div>
   )
 }
 
