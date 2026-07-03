@@ -10,7 +10,7 @@ import Button from '../components/ui/Button'
 export default function Register() {
   const navigate = useNavigate()
   const [form, setForm] = useState({
-    full_name: '', email: '', mobile: '', voter_id: '', password: '', confirm: '',
+    full_name: '', college_pin: '', email: '', password: '', confirm: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,11 +22,10 @@ export default function Register() {
   /* Inline validation */
   const v = {
     full_name: touched.full_name && !form.full_name ? 'Full name is required' : '',
+    college_pin: touched.college_pin && !form.college_pin ? 'College PIN is required' :
+                 touched.college_pin && form.college_pin.length < 3 ? 'Enter a valid College PIN' : '',
     email: touched.email && !form.email ? 'Email is required' :
            touched.email && !/\S+@\S+\.\S+/.test(form.email) ? 'Enter a valid email' : '',
-    mobile: touched.mobile && !form.mobile ? 'Mobile number is required' :
-            touched.mobile && form.mobile.length < 10 ? 'Enter a valid mobile number' : '',
-    voter_id: touched.voter_id && !form.voter_id ? 'Student ID is required' : '',
     password: touched.password && !form.password ? 'Password is required' :
               touched.password && form.password.length < 8 ? 'Must be at least 8 characters' : '',
     confirm: touched.confirm && form.confirm !== form.password ? 'Passwords do not match' : '',
@@ -40,7 +39,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setTouched({ full_name: true, email: true, mobile: true, voter_id: true, password: true, confirm: true })
+    setTouched({ full_name: true, college_pin: true, email: true, password: true, confirm: true })
 
     if (Object.values(v).some(Boolean)) return
     if (form.password !== form.confirm) { setError('Passwords do not match.'); return }
@@ -53,8 +52,7 @@ export default function Register() {
       options: {
         data: {
           full_name: form.full_name,
-          mobile: form.mobile,
-          voter_id: form.voter_id,
+          voter_id: form.college_pin,
         },
       },
     })
@@ -68,53 +66,86 @@ export default function Register() {
     <PageShell maxWidth="md">
       <Card padding="p-6 sm:p-8">
         <div className="text-center mb-6">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-xl mb-3">📝</div>
+          <div className="w-12 h-12 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-xl mb-3" aria-hidden="true">📝</div>
           <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--ink)]">Create Voter Account</h1>
           <p className="text-xs text-[var(--ink-soft)] mt-1">Government Polytechnic, Dharmavaram</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Personal Information */}
-          <fieldset className="space-y-4">
-            <legend className="text-xs font-semibold text-[var(--ink-soft)] uppercase tracking-wider mb-2 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-[var(--ink)] text-[var(--paper)] text-[10px] flex items-center justify-center font-bold">1</span>
-              Personal Information
-            </legend>
-            <FormField label="Full Name" value={form.full_name} onChange={update('full_name')} onBlur={touch('full_name')} placeholder="e.g. Sudarshan Kumar" required error={v.full_name} autoComplete="name" />
-            <div className="grid sm:grid-cols-2 gap-4">
-              <FormField label="Email Address" type="email" value={form.email} onChange={update('email')} onBlur={touch('email')} placeholder="e.g. student@gptdvm.in" required error={v.email} autoComplete="email" />
-              <FormField label="Mobile Number" type="tel" value={form.mobile} onChange={update('mobile')} onBlur={touch('mobile')} placeholder="e.g. +91 9988776655" required error={v.mobile} autoComplete="tel" />
-            </div>
-            <FormField label="Student Admission No. / College ID" value={form.voter_id} onChange={update('voter_id')} onBlur={touch('voter_id')} placeholder="e.g. 21001-C-001" required error={v.voter_id} />
-          </fieldset>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <FormField
+            label="Full Name"
+            value={form.full_name}
+            onChange={update('full_name')}
+            onBlur={touch('full_name')}
+            placeholder="As per college records"
+            required
+            error={v.full_name}
+            autoComplete="name"
+          />
 
-          {/* Security */}
-          <fieldset className="space-y-4 pt-2">
-            <legend className="text-xs font-semibold text-[var(--ink-soft)] uppercase tracking-wider mb-2 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-[var(--ink)] text-[var(--paper)] text-[10px] flex items-center justify-center font-bold">2</span>
-              Account Security
-            </legend>
-            <FormField label="Password" type="password" value={form.password} onChange={update('password')} onBlur={touch('password')} placeholder="Min. 8 characters" required error={v.password} autoComplete="new-password" />
+          <FormField
+            label="College PIN"
+            value={form.college_pin}
+            onChange={update('college_pin')}
+            onBlur={touch('college_pin')}
+            placeholder="e.g. 21001-C-001"
+            required
+            error={v.college_pin}
+            hint="Your unique College PIN from the admission records"
+          />
 
-            {/* Password strength bar */}
-            {form.password.length > 0 && (
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1 flex-1">
-                  {[1, 2, 3].map((level) => (
-                    <div key={level} className={`h-1 flex-1 rounded-full transition-all duration-300 ${passwordStrength >= level ? strengthColors[passwordStrength] : 'bg-[var(--line)]'}`} />
-                  ))}
-                </div>
-                <span className="text-[11px] font-medium text-[var(--ink-soft)]">{strengthLabels[passwordStrength]}</span>
+          <FormField
+            label="Email Address"
+            type="email"
+            value={form.email}
+            onChange={update('email')}
+            onBlur={touch('email')}
+            placeholder="student@gptdvm.in"
+            required
+            error={v.email}
+            autoComplete="email"
+          />
+
+          <FormField
+            label="Password"
+            type="password"
+            value={form.password}
+            onChange={update('password')}
+            onBlur={touch('password')}
+            placeholder="Min. 8 characters"
+            required
+            error={v.password}
+            autoComplete="new-password"
+          />
+
+          {/* Password strength bar */}
+          {form.password.length > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1 flex-1">
+                {[1, 2, 3].map((level) => (
+                  <div key={level} className={`h-1 flex-1 rounded-full transition-all duration-300 ${passwordStrength >= level ? strengthColors[passwordStrength] : 'bg-[var(--line)]'}`} />
+                ))}
               </div>
-            )}
+              <span className="text-[11px] font-medium text-[var(--ink-soft)]">{strengthLabels[passwordStrength]}</span>
+            </div>
+          )}
 
-            <FormField label="Confirm Password" type="password" value={form.confirm} onChange={update('confirm')} onBlur={touch('confirm')} placeholder="Re-enter password" required error={v.confirm} autoComplete="new-password" />
-          </fieldset>
+          <FormField
+            label="Confirm Password"
+            type="password"
+            value={form.confirm}
+            onChange={update('confirm')}
+            onBlur={touch('confirm')}
+            placeholder="Re-enter password"
+            required
+            error={v.confirm}
+            autoComplete="new-password"
+          />
 
           <Alert variant="error">{error}</Alert>
 
           <Button type="submit" loading={loading} fullWidth size="lg">
-            {loading ? 'Creating voter record…' : 'Register Account'}
+            {loading ? 'Creating account…' : 'Register Account'}
           </Button>
         </form>
 

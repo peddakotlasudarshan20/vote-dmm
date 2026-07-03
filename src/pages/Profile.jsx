@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import StatusBadge from '../components/StatusBadge'
+import { formatDateTime } from '../lib/dateTime'
+import Badge from '../components/ui/Badge'
 import PageShell from '../components/ui/PageShell'
 import Card from '../components/ui/Card'
 import FormField from '../components/ui/FormField'
@@ -43,9 +44,9 @@ export default function Profile() {
           <div>
             <h1 className="font-display text-xl sm:text-2xl font-semibold">{profile.full_name}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <StatusBadge status={profile.status} />
+              <Badge status={profile.status} />
               {profile.role === 'admin' && (
-                <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[var(--gold)] bg-[var(--gold-soft)] px-2 py-0.5 rounded-full">Admin</span>
+                <Badge variant="warning" label="Admin" />
               )}
             </div>
           </div>
@@ -57,9 +58,9 @@ export default function Profile() {
         <h2 className="text-xs font-semibold text-[var(--ink-soft)] uppercase tracking-wider mb-4">Account Details</h2>
         <dl className="space-y-0">
           <Row label="Email" value={profile.email} icon="📧" />
-          <Row label="Mobile" value={profile.mobile} icon="📱" />
-          <Row label="Voter ID" value={profile.voter_id} icon="🪪" />
-          <Row label="Role" value={profile.role} icon="👤" last />
+          <Row label="College PIN" value={profile.voter_id} icon="🪪" />
+          <Row label="Role" value={profile.role} icon="👤" />
+          <Row label="Registered" value={formatDateTime(profile.created_at)} icon="📅" last />
         </dl>
       </Card>
 
@@ -93,7 +94,7 @@ function Row({ label, value, icon, last = false }) {
   return (
     <div className={`flex items-center justify-between py-3 ${!last ? 'border-b border-[var(--line)]' : ''}`}>
       <dt className="flex items-center gap-2 text-sm text-[var(--ink-soft)]">
-        <span className="text-xs">{icon}</span>
+        <span className="text-xs" aria-hidden="true">{icon}</span>
         {label}
       </dt>
       <dd className="font-medium text-sm">{value || '—'}</dd>

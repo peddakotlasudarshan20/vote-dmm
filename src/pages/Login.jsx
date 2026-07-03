@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../context/AuthContext'
 import PageShell from '../components/ui/PageShell'
 import Card from '../components/ui/Card'
 import FormField from '../components/ui/FormField'
@@ -9,6 +10,7 @@ import Button from '../components/ui/Button'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { refreshProfile } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -40,15 +42,18 @@ export default function Login() {
       setError(err.message)
       return
     }
+
+    // Refresh profile and redirect based on role
+    await refreshProfile()
     navigate('/dashboard')
   }
 
   return (
-    <PageShell maxWidth="md">
+    <PageShell maxWidth="sm">
       <Card padding="p-6 sm:p-8">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-xl mb-3">🔐</div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--ink)]">Portal Authentication</h1>
+          <div className="w-12 h-12 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-xl mb-3" aria-hidden="true">🗳️</div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--ink)]">Student Login</h1>
           <p className="text-xs text-[var(--ink-soft)] mt-1">Government Polytechnic, Dharmavaram</p>
         </div>
 
@@ -60,7 +65,7 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onBlur={touch('email')}
-            placeholder="e.g. voter@gptdvm.in"
+            placeholder="student@gptdvm.in"
             error={emailError}
             autoComplete="email"
           />
@@ -71,7 +76,7 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onBlur={touch('password')}
-            placeholder="Enter your account password"
+            placeholder="Enter your password"
             error={passwordError}
             autoComplete="current-password"
           />
@@ -79,15 +84,21 @@ export default function Login() {
           <Alert variant="error">{error}</Alert>
 
           <Button type="submit" loading={loading} fullWidth size="lg">
-            {loading ? 'Authenticating…' : 'Log In'}
+            {loading ? 'Signing in…' : 'Log In'}
           </Button>
         </form>
 
-        <div className="mt-6 pt-5 border-t border-[var(--line)] text-center">
+        <div className="mt-6 pt-5 border-t border-[var(--line)] space-y-2 text-center">
           <p className="text-xs text-[var(--ink-soft)]">
-            New student voter?{' '}
+            New student?{' '}
             <Link to="/register" className="text-[var(--gold)] font-bold hover:underline transition-colors">
               Register account
+            </Link>
+          </p>
+          <p className="text-xs text-[var(--ink-soft)]">
+            Administrator?{' '}
+            <Link to="/admin/login" className="text-[var(--ink-soft)] hover:text-[var(--ink)] underline transition-colors">
+              Admin portal →
             </Link>
           </p>
         </div>

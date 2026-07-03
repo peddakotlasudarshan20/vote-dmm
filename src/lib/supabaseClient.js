@@ -146,8 +146,25 @@ if (isPlaceholder) {
         if (Object.values(db.users).some((u) => u.email === email)) {
           return { data: null, error: { message: 'User already exists' } }
         }
-        const id = 'user-' + Math.random().toString(36).substr(2, 9)
+
+        const collegePin = options.data?.voter_id || ''
         const isEmailAdmin = email.includes('admin') || email === 'admin@example.com'
+
+        // Validate College PIN (non-admin users)
+        if (!isEmailAdmin) {
+          if (!collegePin) {
+            return { data: null, error: { message: 'College PIN is required' } }
+          }
+          // Check if PIN already used by another account
+          const pinTaken = Object.values(db.users).some(
+            (u) => u.profile?.voter_id === collegePin
+          )
+          if (pinTaken) {
+            return { data: null, error: { message: 'This College PIN is already registered to another account' } }
+          }
+        }
+
+        const id = 'user-' + Math.random().toString(36).substr(2, 9)
         const newUser = {
           id,
           email,
@@ -157,10 +174,9 @@ if (isPlaceholder) {
             id,
             email,
             full_name: options.data?.full_name || '',
-            mobile: options.data?.mobile || '',
-            voter_id: options.data?.voter_id || '',
+            voter_id: collegePin,
             role: isEmailAdmin ? 'admin' : 'voter',
-            status: isEmailAdmin ? 'approved' : 'pending_approval',
+            status: 'approved',
             created_at: new Date().toISOString()
           }
         }

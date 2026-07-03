@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api'
 import { supabase } from '../../lib/supabaseClient'
-import PageShell from '../../components/ui/PageShell'
-import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import FormField from '../../components/ui/FormField'
 import Alert from '../../components/ui/Alert'
 import Button from '../../components/ui/Button'
+import Dialog from '../../components/ui/Dialog'
 import { SkeletonCard } from '../../components/ui/Skeleton'
 
 const EMPTY = {
@@ -20,6 +19,7 @@ export default function ManageCandidates() {
   const [form, setForm] = useState(EMPTY)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
 
   useEffect(() => {
     api.listElections().then(setElections)
@@ -47,102 +47,95 @@ export default function ManageCandidates() {
     setSaving(false)
   }
 
-  const remove = async (id) => {
-    if (!confirm('Remove this candidate?')) return
-    await api.deleteCandidate(id)
+  const handleDelete = async () => {
+    if (!deleteId) return
+    await api.deleteCandidate(deleteId)
+    setDeleteId(null)
     loadCandidates()
   }
 
   return (
-    <PageShell maxWidth="xl" backTo="/admin" backLabel="Back to admin dashboard">
-      <PageHeader
-        title="Candidate Registrar"
-        subtitle="Register nominees and upload campaign platforms for active ballots."
-      />
+    <div>
+      <div className="mb-6">
+        <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Candidates</h1>
+        <p className="text-sm text-[var(--ink-soft)] mt-0.5">Register nominees for active elections.</p>
+      </div>
 
-      <Card className="mb-8">
-        <form onSubmit={submit} className="space-y-5">
-          <h2 className="font-bold text-lg text-[var(--ink)]">👤 Nominate New Candidate</h2>
+      <Card className="mb-6" padding="p-4 sm:p-6">
+        <form onSubmit={submit} className="space-y-4">
+          <h2 className="font-bold text-sm text-[var(--ink)]">👤 Nominate Candidate</h2>
 
-          <div className="space-y-4">
-            <FormField
-              label="Select Target Ballot"
-              as="select"
-              required
-              value={form.election_id}
-              onChange={update('election_id')}
-            >
-              <option value="">Select election…</option>
-              {elections.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </FormField>
+          <FormField label="Election" as="select" required value={form.election_id} onChange={update('election_id')}>
+            <option value="">Select election…</option>
+            {elections.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+          </FormField>
 
-            <div className="grid sm:grid-cols-2 gap-5">
-              <FormField label="Candidate Name" value={form.name} onChange={update('name')} placeholder="e.g. John Doe" required />
-              <FormField label="Party Affiliation" value={form.party_name} onChange={update('party_name')} placeholder="e.g. Independent" />
-              <FormField label="Photo URL" value={form.photo_url} onChange={update('photo_url')} placeholder="Image URL link" hint="Direct link to candidate photo" />
-              <FormField label="Party Symbol URL" value={form.party_symbol_url} onChange={update('party_symbol_url')} placeholder="Symbol URL link" />
-              <FormField label="Age" type="number" value={form.age} onChange={update('age')} placeholder="Nominee age" />
-              <FormField label="Academic Qualification" value={form.qualification} onChange={update('qualification')} placeholder="e.g. B.Tech 3rd Year" />
-            </div>
-
-            <FormField label="Experience / Achievements" value={form.experience} onChange={update('experience')} placeholder="Brief summary of past leadership roles" />
-
-            <FormField
-              label="Campaign Biography"
-              as="textarea"
-              placeholder="Tell students who you are and why they should vote for you"
-              value={form.biography}
-              onChange={update('biography')}
-              rows={3}
-            />
-
-            <FormField label="Manifesto PDF URL" value={form.manifesto_url} onChange={update('manifesto_url')} placeholder="Link to campaign document" hint="Upload to a hosting service and paste the URL" />
+          <div className="grid sm:grid-cols-2 gap-4">
+            <FormField label="Name" value={form.name} onChange={update('name')} placeholder="Full name" required />
+            <FormField label="Party" value={form.party_name} onChange={update('party_name')} placeholder="Independent" />
+            <FormField label="Photo URL" value={form.photo_url} onChange={update('photo_url')} placeholder="Image link" />
+            <FormField label="Age" type="number" value={form.age} onChange={update('age')} placeholder="Age" />
+            <FormField label="Qualification" value={form.qualification} onChange={update('qualification')} placeholder="B.Tech 3rd Year" />
+            <FormField label="Experience" value={form.experience} onChange={update('experience')} placeholder="Past roles" />
           </div>
+
+          <FormField label="Biography" as="textarea" placeholder="Campaign message" value={form.biography} onChange={update('biography')} rows={3} />
+          <FormField label="Manifesto URL" value={form.manifesto_url} onChange={update('manifesto_url')} placeholder="PDF link" />
 
           <Alert variant="error">{error}</Alert>
 
-          <Button type="submit" loading={saving}>
-            {saving ? 'Adding…' : 'Add Candidate Nominee'}
+          <Button type="submit" loading={saving} size="sm">
+            {saving ? 'Adding…' : 'Add Candidate'}
           </Button>
         </form>
       </Card>
 
       {!candidates && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[0, 1, 2].map((i) => <SkeletonCard key={i} lines={2} />)}
         </div>
       )}
 
       {candidates && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {candidates.map((c, i) => (
             <Card
               key={c.id}
               hoverable
-              padding="p-5"
-              className="animate-card-enter flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              padding="p-3 sm:p-4"
+              className="animate-card-enter"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--gold-soft)] flex items-center justify-center shrink-0 overflow-hidden">
-                  {c.photo_url
-                    ? <img src={c.photo_url} alt="" className="w-full h-full object-cover" />
-                    : <span className="font-display font-bold text-[var(--gold)]">{c.name?.[0]}</span>}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-[var(--gold-soft)] flex items-center justify-center shrink-0 overflow-hidden">
+                    {c.photo_url
+                      ? <img src={c.photo_url} alt={c.name} className="w-full h-full object-cover" />
+                      : <span className="font-display font-bold text-sm text-[var(--gold)]">{c.name?.[0]}</span>}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-[var(--ink)] truncate">
+                      {c.name} <span className="text-[var(--ink-soft)] font-normal">— {c.party_name || 'Independent'}</span>
+                    </p>
+                    <p className="text-[10px] text-[var(--gold)] font-mono uppercase font-semibold truncate">🎯 {c.elections?.name || '—'}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-base text-[var(--ink)]">
-                    {c.name} <span className="text-[var(--ink-soft)] font-normal text-sm">— {c.party_name || 'Independent'}</span>
-                  </p>
-                  <p className="text-xs text-[var(--gold)] font-mono uppercase font-semibold mt-0.5">🎯 {c.elections?.name || 'Loading...'}</p>
-                </div>
+                <Button variant="danger" size="sm" onClick={() => setDeleteId(c.id)}>
+                  Remove
+                </Button>
               </div>
-              <Button variant="danger" size="sm" onClick={() => remove(c.id)}>
-                Remove
-              </Button>
             </Card>
           ))}
         </div>
       )}
-    </PageShell>
+
+      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)} title="Remove candidate?">
+        <p className="text-sm text-[var(--ink-soft)] mb-6">This candidate will be permanently removed from the election.</p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" size="sm" onClick={() => setDeleteId(null)}>Cancel</Button>
+          <Button variant="danger" size="sm" onClick={handleDelete}>Remove</Button>
+        </div>
+      </Dialog>
+    </div>
   )
 }

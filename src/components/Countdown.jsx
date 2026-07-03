@@ -1,7 +1,10 @@
 import { useEffect, useState, memo } from 'react'
+import { toIST } from '../lib/dateTime'
 
 function diff(target) {
-  const ms = new Date(target) - new Date()
+  const now = new Date()
+  const end = new Date(target)
+  const ms = end - now
   if (ms <= 0) return null
   const d = Math.floor(ms / 86400000)
   const h = Math.floor((ms % 86400000) / 3600000)
@@ -23,11 +26,11 @@ const Countdown = memo(function Countdown({ target, label }) {
   const ariaText = `${label} ${t.d} days, ${t.h} hours, ${t.m} minutes, ${t.s} seconds`
 
   return (
-    <div className="flex items-center gap-3 font-mono text-sm" role="timer" aria-label={ariaText}>
-      <span className="text-[var(--ink-soft)]">{label}</span>
+    <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-sm" role="timer" aria-label={ariaText}>
+      <span className="text-[var(--ink-soft)] text-xs">{label}</span>
       <span className="flex gap-1.5" aria-hidden="true">
         {[[t.d, 'd'], [t.h, 'h'], [t.m, 'm'], [t.s, 's']].map(([v, u]) => (
-          <span key={u} className="px-1.5 py-0.5 bg-[var(--ink)] text-[var(--paper)] rounded tabular-nums">
+          <span key={u} className="px-1.5 py-0.5 bg-[var(--ink)] text-[var(--paper)] rounded tabular-nums text-xs">
             {String(v).padStart(2, '0')}{u}
           </span>
         ))}

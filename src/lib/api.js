@@ -393,6 +393,57 @@ const mockApi = {
     db.candidates = db.candidates.filter((c) => c.id !== id)
     saveDB(db)
     return { success: true }
+  },
+  markNotificationRead: async (id) => {
+    const db = getDB()
+    const n = db.notifications.find((n) => n.id === id)
+    if (n) { n.read = true; saveDB(db) }
+    return { success: true }
+  },
+  markAllNotificationsRead: async () => {
+    const profile = getMockCurrentUserProfile()
+    const db = getDB()
+    db.notifications.forEach((n) => {
+      if (n.user_id === null || n.user_id === profile?.id) n.read = true
+    })
+    saveDB(db)
+    return { success: true }
+  },
+  createNotification: async (body) => {
+    const db = getDB()
+    const n = {
+      id: 'n-' + Math.random().toString(36).substr(2, 9),
+      user_id: body.user_id || null,
+      title: body.title,
+      message: body.message,
+      type: body.type || 'info',
+      pinned: body.pinned || false,
+      read: false,
+      created_at: new Date().toISOString()
+    }
+    db.notifications.push(n)
+    saveDB(db)
+    return n
+  },
+  updateNotification: async (id, body) => {
+    const db = getDB()
+    const idx = db.notifications.findIndex((n) => n.id === id)
+    if (idx !== -1) {
+      db.notifications[idx] = { ...db.notifications[idx], ...body }
+      saveDB(db)
+      return db.notifications[idx]
+    }
+    return {}
+  },
+  deleteNotification: async (id) => {
+    const db = getDB()
+    db.notifications = db.notifications.filter((n) => n.id !== id)
+    saveDB(db)
+    return { success: true }
+  },
+  adminListNotifications: async () => {
+    const db = getDB()
+    return db.notifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   }
 }
 
@@ -405,6 +456,8 @@ export const api = supabase.isMock ? mockApi : {
   // voter
   profile: () => request('/api/profile', { auth: true }),
   notifications: () => request('/api/notifications', { auth: true }),
+  markNotificationRead: (id) => request(`/api/notifications/${id}/read`, { method: 'POST', auth: true }),
+  markAllNotificationsRead: () => request('/api/notifications/read-all', { method: 'POST', auth: true }),
   vote: (election_id, candidate_id) =>
     request('/api/vote', { method: 'POST', auth: true, body: { election_id, candidate_id } }),
 
@@ -420,5 +473,9 @@ export const api = supabase.isMock ? mockApi : {
   addCandidate: (body) => request('/api/admin/candidates', { method: 'POST', auth: true, body }),
   updateCandidate: (id, body) => request(`/api/admin/candidates/${id}`, { method: 'PUT', auth: true, body }),
   deleteCandidate: (id) => request(`/api/admin/candidates/${id}`, { method: 'DELETE', auth: true }),
+  createNotification: (body) => request('/api/admin/notifications', { method: 'POST', auth: true, body }),
+  updateNotification: (id, body) => request(`/api/admin/notifications/${id}`, { method: 'PUT', auth: true, body }),
+  deleteNotification: (id) => request(`/api/admin/notifications/${id}`, { method: 'DELETE', auth: true }),
+  adminListNotifications: () => request('/api/admin/notifications', { auth: true }),
 }
 

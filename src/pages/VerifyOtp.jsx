@@ -39,7 +39,7 @@ export default function VerifyOtp() {
       setError(err.message)
       return
     }
-    navigate('/pending-approval')
+    navigate('/dashboard')
   }
 
   const resend = async () => {

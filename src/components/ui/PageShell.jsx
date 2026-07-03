@@ -23,7 +23,7 @@ export default function PageShell({
 }) {
   return (
     <div
-      className={`animate-page-enter ${MAX_WIDTHS[maxWidth] || MAX_WIDTHS.xl} mx-auto px-4 sm:px-6 py-10 sm:py-12 ${center ? 'text-center' : ''} ${className}`}
+      className={`animate-page-enter ${MAX_WIDTHS[maxWidth] || MAX_WIDTHS.xl} mx-auto px-4 sm:px-6 py-6 sm:py-10 md:py-12 ${center ? 'text-center' : ''} ${className}`}
     >
       {backTo && (
         <Link

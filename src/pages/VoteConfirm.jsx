@@ -39,18 +39,23 @@ export default function VoteConfirm() {
 
   return (
     <PageShell maxWidth="sm" center>
-      <h1 className="font-display text-2xl font-semibold mb-2">Confirm your vote</h1>
-      <p className="text-[var(--ink-soft)] mb-8">This action cannot be undone once submitted.</p>
+      <div className="w-14 h-14 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-2xl mb-4" aria-hidden="true">🗳️</div>
+      <h1 className="font-display text-xl sm:text-2xl font-semibold mb-1">Confirm your vote</h1>
+      <p className="text-sm text-[var(--ink-soft)] mb-6">This action cannot be undone once submitted.</p>
 
       {candidate && (
-        <Card className="mb-6" padding="p-6">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center overflow-hidden mb-3">
-            {candidate.photo_url
-              ? <img src={candidate.photo_url} alt={candidate.name} className="w-full h-full object-cover" />
-              : <span className="font-display text-xl" aria-hidden="true">{candidate.name[0]}</span>}
+        <Card className="mb-6" padding="p-5 sm:p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-[var(--gold-soft)] flex items-center justify-center overflow-hidden shrink-0">
+              {candidate.photo_url
+                ? <img src={candidate.photo_url} alt={candidate.name} className="w-full h-full object-cover" />
+                : <span className="font-display text-lg font-bold text-[var(--gold)]" aria-hidden="true">{candidate.name[0]}</span>}
+            </div>
+            <div className="min-w-0">
+              <p className="font-display text-lg font-semibold truncate">{candidate.name}</p>
+              <p className="text-xs text-[var(--ink-soft)]">{candidate.party_name || 'Independent'}</p>
+            </div>
           </div>
-          <p className="font-display text-xl font-semibold">{candidate.name}</p>
-          <p className="text-sm text-[var(--ink-soft)]">{candidate.party_name}</p>
         </Card>
       )}
 

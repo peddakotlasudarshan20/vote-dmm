@@ -189,18 +189,25 @@ export default function Navbar() {
               No notifications yet.
             </p>
           )}
-          {notifs.map((n) => (
+          {notifs.slice(0, 5).map((n) => (
             <div
               key={n.id}
               role="menuitem"
-              className="p-3 rounded-lg hover:bg-[var(--paper)]
+              className={`p-3 rounded-lg hover:bg-[var(--paper)]
                          border-b last:border-b-0 border-[var(--line)]
-                         transition-colors duration-150"
+                         transition-colors duration-150 ${!n.read ? 'bg-[var(--gold-soft)]/30' : ''}`}
             >
               <p className="text-sm font-medium">{n.title}</p>
-              <p className="text-xs text-[var(--ink-soft)] mt-0.5">{n.message}</p>
+              <p className="text-xs text-[var(--ink-soft)] mt-0.5 line-clamp-1">{n.message}</p>
             </div>
           ))}
+          <Link
+            to="/notifications"
+            onClick={() => setNotifOpen(false)}
+            className="block text-center text-xs font-semibold text-[var(--gold)] py-2 mt-1 hover:underline"
+          >
+            View all →
+          </Link>
         </div>
       )}
     </div>
@@ -349,6 +356,17 @@ export default function Navbar() {
                                transition-colors duration-150"
                   >
                     Elections
+                  </NavLink>
+                  <NavLink
+                    to="/notifications"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-3 rounded-lg text-sm hover:bg-[var(--paper)]
+                               transition-colors duration-150"
+                  >
+                    Notifications
+                    {unread > 0 && (
+                      <span className="ml-1.5 text-[10px] font-bold text-white bg-[var(--ballot-red)] px-1.5 py-0.5 rounded-full">{unread}</span>
+                    )}
                   </NavLink>
                   {isAdmin && (
                     <NavLink

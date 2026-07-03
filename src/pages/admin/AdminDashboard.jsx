@@ -1,14 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
-import PageShell from '../../components/ui/PageShell'
-import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import { SkeletonStatGrid } from '../../components/ui/Skeleton'
 
 const STAT_CONFIG = {
   registered_users: { label: 'Registered Students', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: '👥' },
-  pending_approvals: { label: 'Awaiting Review', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: '⏳' },
   approved_users: { label: 'Approved Voters', color: 'bg-teal-500/10 text-teal-600 border-teal-500/20', icon: '✅' },
   elections: { label: 'Total Elections', color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', icon: '🗳️' },
   candidates: { label: 'Nominated Candidates', color: 'bg-purple-500/10 text-purple-600 border-purple-500/20', icon: '👤' },
@@ -21,41 +18,33 @@ export default function AdminDashboard() {
   useEffect(() => { api.dashboardStats().then(setStats) }, [])
 
   return (
-    <PageShell maxWidth="xl">
-      <PageHeader
-        title="Administrative Center"
-        subtitle="Manage student voter registrations, list/create elections, and oversee ballots counts."
-      />
+    <div>
+      <div className="mb-6">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-[var(--ink)]">Dashboard</h1>
+        <p className="text-sm text-[var(--ink-soft)] mt-1">Manage elections, voters, and ballots.</p>
+      </div>
 
       {/* Skeleton while loading */}
-      {!stats && <SkeletonStatGrid count={6} />}
+      {!stats && <SkeletonStatGrid count={5} />}
 
       {/* Stat cards with staggered pop-in animation */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {Object.entries(STAT_CONFIG).map(([key, config], i) => {
             const value = stats[key] ?? 0
-            const hasAlert = key === 'pending_approvals' && value > 0
-
             return (
               <Card
                 key={key}
                 hoverable
-                padding="p-5"
-                className={`animate-stat-pop relative overflow-hidden ${hasAlert ? 'border-[var(--gold)] ring-2 ring-[var(--gold)]/10' : ''}`}
+                padding="p-4 sm:p-5"
+                className="animate-stat-pop relative overflow-hidden"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-[11px] font-semibold text-[var(--ink-soft)] tracking-tight uppercase leading-tight">{config.label}</span>
-                  <span className={`text-lg p-2 rounded-xl border ${config.color} transition-transform hover:scale-110`}>{config.icon}</span>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-[var(--ink-soft)] tracking-tight uppercase leading-tight">{config.label}</span>
+                  <span className={`text-base sm:text-lg p-1.5 sm:p-2 rounded-xl border ${config.color}`} aria-hidden="true">{config.icon}</span>
                 </div>
-                <p className="font-display text-3xl sm:text-4xl font-extrabold text-[var(--ink)] tabular-nums">{value.toLocaleString()}</p>
-                {hasAlert && (
-                  <div className="mt-2 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] animate-pulse" />
-                    <span className="text-[10px] font-semibold text-[var(--gold)] font-mono uppercase">Action Needed</span>
-                  </div>
-                )}
+                <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--ink)] tabular-nums">{value.toLocaleString()}</p>
               </Card>
             )
           })}
@@ -64,54 +53,47 @@ export default function AdminDashboard() {
 
       {stats && (
         <>
-          <h2 className="font-display text-xl sm:text-2xl font-bold text-[var(--ink)] mb-4">Management Modules</h2>
-          <div className="grid sm:grid-cols-3 gap-5">
-            <AdminLink
-              to="/admin/approvals"
-              title="Voter Approvals"
-              desc="Verify and approve student registrations to grant ballot voting rights."
-              icon="🛡️"
-              count={stats.pending_approvals}
-            />
+          <h2 className="font-display text-lg sm:text-xl font-bold text-[var(--ink)] mb-4">Quick Actions</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <AdminLink
               to="/admin/elections"
-              title="Election Editor"
-              desc="Create and edit election timelines, configure banners, and publish live results."
+              title="Elections"
+              desc="Create and manage election timelines."
               icon="⚙️"
             />
             <AdminLink
               to="/admin/candidates"
-              title="Candidate Registrar"
-              desc="Manage nominee profiles, campaign biographies, and manifesto upload links."
+              title="Candidates"
+              desc="Manage nominee profiles and bios."
               icon="📝"
+            />
+            <AdminLink
+              to="/admin/notifications"
+              title="Notifications"
+              desc="Send announcements to all students."
+              icon="🔔"
             />
           </div>
         </>
       )}
-    </PageShell>
+    </div>
   )
 }
 
-function AdminLink({ to, title, desc, icon, count }) {
+const AdminLink = memo(function AdminLink({ to, title, desc, icon }) {
   return (
     <Link
       to={to}
-      className="bg-[var(--paper-raised)] border border-[var(--line)] rounded-2xl p-5 sm:p-6 hover:border-[var(--gold)] transition-all flex flex-col justify-between shadow-xs card-hover group"
+      className="bg-[var(--paper-raised)] border border-[var(--line)] rounded-2xl p-4 sm:p-5 hover:border-[var(--gold)] transition-all flex flex-col justify-between shadow-xs card-hover group"
     >
       <div>
-        <div className="flex items-start justify-between mb-4">
-          <div className="text-2xl bg-[var(--paper)] w-10 h-10 flex items-center justify-center rounded-xl border border-[var(--line)]/50 group-hover:scale-110 transition-transform">{icon}</div>
-          {count > 0 && (
-            <span className="text-[10px] font-bold text-white bg-[var(--gold)] px-2 py-0.5 rounded-full">{count}</span>
-          )}
-        </div>
-        <h3 className="font-bold text-base sm:text-lg text-[var(--ink)] mb-1">{title}</h3>
-        <p className="text-xs sm:text-sm text-[var(--ink-soft)] leading-relaxed">{desc}</p>
+        <div className="text-xl bg-[var(--paper)] w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--line)]/50 group-hover:scale-110 transition-transform mb-3" aria-hidden="true">{icon}</div>
+        <h3 className="font-bold text-sm sm:text-base text-[var(--ink)] mb-1">{title}</h3>
+        <p className="text-xs text-[var(--ink-soft)] leading-relaxed">{desc}</p>
       </div>
-      <div className="mt-4 text-xs font-semibold text-[var(--gold)] flex items-center gap-1 group-hover:gap-2 transition-all">
-        Configure Module <span className="transition-transform group-hover:translate-x-0.5">→</span>
+      <div className="mt-3 text-xs font-semibold text-[var(--gold)] flex items-center gap-1 group-hover:gap-2 transition-all">
+        Open <span className="transition-transform group-hover:translate-x-0.5">→</span>
       </div>
     </Link>
   )
-}
-export { AdminLink }
+})

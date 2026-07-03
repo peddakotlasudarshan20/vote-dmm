@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import StatusBadge from '../components/StatusBadge'
+import Badge from '../components/ui/Badge'
 import PageShell from '../components/ui/PageShell'
 import Button from '../components/ui/Button'
 
@@ -9,7 +9,7 @@ export default function PendingApproval() {
   const { profile, signOut, refreshProfile } = useAuth()
   const navigate = useNavigate()
 
-  const status = profile?.status || 'pending_approval'
+  const status = profile?.status || 'rejected'
 
   useEffect(() => {
     if (status === 'approved') {
@@ -17,25 +17,21 @@ export default function PendingApproval() {
     }
   }, [status, navigate])
 
-  const recheck = async () => {
-    await refreshProfile()
-  }
-
   return (
-    <PageShell maxWidth="md" center>
-      <div className="w-16 h-16 mx-auto rounded-full bg-[var(--gold-soft)] flex items-center justify-center text-3xl mb-6">⏳</div>
-      <h1 className="font-display text-2xl font-semibold mb-2">
-        {status === 'rejected' ? 'Registration not approved' : 'Awaiting administrator approval'}
+    <PageShell maxWidth="sm" center>
+      <div className="w-14 h-14 mx-auto rounded-full bg-[var(--ballot-red-soft)] flex items-center justify-center text-2xl mb-5" aria-hidden="true">⚠️</div>
+      <h1 className="font-display text-xl sm:text-2xl font-semibold mb-2">
+        {status === 'rejected' ? 'Registration not approved' : 'Account issue'}
       </h1>
-      <div className="flex justify-center mb-4"><StatusBadge status={status} /></div>
-      <p className="text-[var(--ink-soft)] mb-8">
+      <div className="flex justify-center mb-4"><Badge status={status} /></div>
+      <p className="text-sm text-[var(--ink-soft)] mb-8 max-w-sm mx-auto">
         {status === 'rejected'
-          ? 'Your registration was reviewed and could not be approved. Contact your election administrator for details.'
-          : 'Your email is verified. An administrator now needs to confirm your voter details before you can log in and vote. Please check back later.'}
+          ? 'Your registration was reviewed and could not be approved. Please contact your election administrator for assistance.'
+          : 'There is an issue with your account. Please contact support or try registering again.'}
       </p>
       <div className="flex gap-3 justify-center">
-        <Button onClick={recheck}>Check status</Button>
-        <Button variant="secondary" onClick={signOut}>Log out</Button>
+        <Button size="sm" onClick={refreshProfile}>Recheck status</Button>
+        <Button variant="secondary" size="sm" onClick={signOut}>Log out</Button>
       </div>
     </PageShell>
   )

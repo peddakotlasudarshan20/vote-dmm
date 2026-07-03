@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api'
-import StatusBadge from '../../components/StatusBadge'
-import PageShell from '../../components/ui/PageShell'
-import PageHeader from '../../components/ui/PageHeader'
+import { formatDateTime } from '../../lib/dateTime'
+import Badge from '../../components/ui/Badge'
+import Tabs from '../../components/ui/Tabs'
 import Card from '../../components/ui/Card'
 import EmptyState from '../../components/ui/EmptyState'
 import Button from '../../components/ui/Button'
@@ -10,11 +10,10 @@ import { SkeletonList } from '../../components/ui/Skeleton'
 
 export default function ApproveUsers() {
   const [users, setUsers] = useState(null)
-  const [filter, setFilter] = useState('pending_approval')
+  const [filter, setFilter] = useState('all')
   const [acting, setActing] = useState(null)
 
   const load = () => api.adminListUsers(filter === 'all' ? undefined : filter).then(setUsers)
-
   useEffect(() => { setUsers(null); load() }, [filter])
 
   const act = async (fn, id) => {
@@ -24,30 +23,26 @@ export default function ApproveUsers() {
     load()
   }
 
+  const tabs = [
+    { value: 'all', label: 'All' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' },
+  ]
+
   return (
-    <PageShell maxWidth="xl" backTo="/admin" backLabel="Back to admin dashboard">
-      <PageHeader
-        title="Voter Approvals"
-        subtitle="Review and authorize student voting registrations."
-        border={false}
-      >
-        <div className="flex flex-wrap gap-1.5 bg-[var(--line)]/40 p-1 rounded-xl">
-          {['pending_approval', 'approved', 'rejected', 'all'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${filter === f ? 'bg-[var(--ink)] text-[var(--paper-raised)] shadow-xs' : 'text-[var(--ink-soft)] hover:text-[var(--ink)]'}`}
-            >
-              {f.replace('_', ' ')}
-            </button>
-          ))}
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Voter Management</h1>
+          <p className="text-sm text-[var(--ink-soft)] mt-0.5">View and manage student registrations.</p>
         </div>
-      </PageHeader>
+        <Tabs tabs={tabs} active={filter} onChange={setFilter} />
+      </div>
 
       {!users && <SkeletonList rows={4} />}
 
       {users && users.length === 0 && (
-        <EmptyState icon="📋" title="No students found in this category." />
+        <EmptyState icon="📋" title="No students found" description="No users match this filter." />
       )}
 
       {users && users.length > 0 && (
@@ -56,27 +51,24 @@ export default function ApproveUsers() {
             {users.map((u, i) => (
               <div
                 key={u.id}
-                className="animate-card-enter flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-4 hover:bg-[var(--paper)]/40 transition-colors"
+                className="animate-card-enter flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 gap-3 hover:bg-[var(--paper)]/40 transition-colors"
                 style={{ animationDelay: `${i * 40}ms` }}
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-base text-[var(--ink)]">{u.full_name}</span>
-                    <StatusBadge status={u.status} />
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-sm text-[var(--ink)]">{u.full_name}</span>
+                    <Badge status={u.status} />
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--ink-soft)] font-mono">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--ink-soft)] font-mono">
                     <span>📧 {u.email}</span>
-                    <span>📞 {u.mobile}</span>
-                    <span className="bg-[var(--line)]/50 px-1.5 py-0.5 rounded">ID: {u.voter_id}</span>
+                    <span className="bg-[var(--line)]/50 px-1.5 py-0.5 rounded">PIN: {u.voter_id}</span>
+                    <span>{formatDateTime(u.created_at)}</span>
                   </div>
                 </div>
-                {u.status === 'pending_approval' && (
+                {u.status === 'rejected' && (
                   <div className="flex items-center gap-2 shrink-0">
                     <Button variant="success" size="sm" loading={acting === u.id} onClick={() => act(api.approveUser, u.id)}>
-                      Approve
-                    </Button>
-                    <Button variant="danger" size="sm" onClick={() => act(api.rejectUser, u.id)}>
-                      Reject
+                      Re-approve
                     </Button>
                   </div>
                 )}
@@ -85,6 +77,6 @@ export default function ApproveUsers() {
           </div>
         </Card>
       )}
-    </PageShell>
+    </div>
   )
 }
